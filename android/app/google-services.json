@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "328159487670",
+    "project_id": "ielts-ai-study-assistant-8e0e0",
+    "storage_bucket": "ielts-ai-study-assistant-8e0e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:328159487670:android:c727109605ee0dc0f2e817",
+        "android_client_info": {
+          "package_name": "com.example.ielts_ai_study"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "328159487670-d9krvt8176o93kmtsrd9369pn787lk60.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ielts_ai_study",
+            "certificate_hash": "de6b03ad83197e230eb91777d52dfe40df185e17"
+          }
+        },
+        {
+          "client_id": "328159487670-cjd9fff0datjgb41mbse1n7lb6pevrtu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaxSRhXl2OL8G9CATX_f7k3XsnmVHhetY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "328159487670-cjd9fff0datjgb41mbse1n7lb6pevrtu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "328159487670-7rlvr8dd5gtcc01cr6np0nsoucjpn2a1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ieltsAiStudy"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
