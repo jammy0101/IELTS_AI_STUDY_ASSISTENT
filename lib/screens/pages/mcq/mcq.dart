@@ -428,6 +428,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../controller/firebase_services/firebase_services.dart';
 import '../../../controller/mcq_controller/mcq_controller.dart';
 
 
@@ -781,7 +782,7 @@ Photosynthesis is the process used by plants to convert light energy into chemic
         child: TextButton.icon(
           onPressed: mcqController.isLoading.value
               ? null
-              : () {
+              : () async {
             if (_textController.text.trim().isEmpty) {
               Get.snackbar(
                 "Error",
@@ -792,8 +793,25 @@ Photosynthesis is the process used by plants to convert light energy into chemic
               return;
             }
 
-            mcqController.generateMCQ(_textController.text.trim());
+            // 1. Generate MCQ
+            await mcqController.generateMCQ(
+              _textController.text.trim(),
+              _difficulty,
+              _focus,
+            );
+
+            // 2. Only update progress if MCQ was generated
+            if (mcqController.question.isNotEmpty) {
+              final fs = Get.find<FirebaseServices>();
+
+              await fs.updateDailyProgress(
+                summaries: 0,
+                questions: 1,   // 👈 MCQ generated → increment questions
+                solved: 0,
+              );
+            }
           },
+
 
           icon: mcqController.isLoading.value
               ? const SizedBox(

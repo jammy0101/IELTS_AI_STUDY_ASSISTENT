@@ -27,6 +27,14 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+
+import '../../../controller/feedback_controller/feedback_controller.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -38,6 +46,7 @@ class FeedbackScreen extends StatefulWidget {
 class _FeedbackScreenState extends State<FeedbackScreen> {
   final TextEditingController _textController = TextEditingController();
   int _charCount = 0;
+  final feedbackController = Get.put(FeedbackController());
 
   String _selectedCategory = "Writing";
 
@@ -80,7 +89,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             const SizedBox(height: 30),
 
             // FEEDBACK RESULT (placeholder)
-            _feedbackResultPlaceholder(),
+          //  _feedbackResultBox(),
+            _feedbackResultCard(),
           ],
         ),
       ),
@@ -282,60 +292,135 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   // SUBMIT BUTTON
   // ------------------------------------------------------------
   Widget _submitButton() {
-    return Container(
-      height: 54,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4A79F6), Color(0xFF8FB2FF)],
+    return Obx(() {
+      return Container(
+        height: 54,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A79F6), Color(0xFF8FB2FF)],
+          ),
+          borderRadius: BorderRadius.circular(14),
         ),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: TextButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.analytics, color: Colors.white),
-        label: const Text(
-          "Get AI Feedback",
-          style: TextStyle(
+        child: TextButton.icon(
+          // onPressed: feedbackController.isLoading.value
+          //     ? null
+          //     : () {
+          //   if (_textController.text.trim().isEmpty) {
+          //     Get.snackbar(
+          //       "Error",
+          //       "Please enter some text.",
+          //       backgroundColor: Colors.red,
+          //       colorText: Colors.white,
+          //     );
+          //     return;
+          //   }
+          //
+          //   feedbackController.generateFeedback(
+          //     _textController.text.trim(),
+          //   );
+          // },
+          onPressed: feedbackController.isLoading.value
+              ? null
+              : () {
+            if (_textController.text.trim().isEmpty) {
+              Get.snackbar("Error", "Please enter some text.",
+                  backgroundColor: Colors.red, colorText: Colors.white);
+              return;
+            }
+
+            feedbackController.generateFeedback(
+              _textController.text.trim(),
+              _selectedCategory,   // ⭐ category passed here
+            );
+          },
+          icon: feedbackController.isLoading.value
+              ? const SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          )
+              : const Icon(Icons.analytics, color: Colors.white),
+          label: Text(
+            feedbackController.isLoading.value
+                ? "Analyzing..."
+                : "Get AI Feedback",
+            style: const TextStyle(
               fontSize: 16,
               color: Colors.white,
-              fontWeight: FontWeight.w700),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
-  // ------------------------------------------------------------
-  // AI FEEDBACK RESULT PLACEHOLDER
-  // ------------------------------------------------------------
-  Widget _feedbackResultPlaceholder() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
-            "AI Feedback",
-            style: TextStyle(
-                fontSize: 15,
+  Widget _feedbackResultCard() {
+    return Obx(() {
+      if (feedbackController.feedback.isEmpty) {
+        return const SizedBox();
+      }
+
+      return Container(
+        margin: const EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // HEADER
+            const Text(
+              "AI Feedback",
+              style: TextStyle(
+                fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: Colors.black87),
-          ),
-          SizedBox(height: 10),
-          Text(
-            "Your feedback will appear here...",
-            style: TextStyle(fontSize: 14, color: Colors.black54),
-          ),
-          SizedBox(height: 10),
-        ],
-      ),
-    );
+                color: Colors.black87,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // FEEDBACK TEXT
+            Container(
+              constraints: const BoxConstraints(
+                minHeight: 100,
+                maxHeight: 300,
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  feedbackController.feedback.value,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+          ],
+        ),
+      );
+    });
   }
 
-  // ------------------------------------------------------------
-  // CARD DECORATION SHARED
-  // ------------------------------------------------------------
+
+
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
       color: Colors.white,

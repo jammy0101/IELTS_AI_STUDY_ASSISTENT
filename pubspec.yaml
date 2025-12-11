@@ -44,6 +44,8 @@ dependencies:
   google_sign_in: ^6.2.1
   intl_phone_number_input: ^0.7.5
   math_expressions: ^2.2.0
+  intl: ^0.20.2
+  fl_chart: ^1.1.1
 
 
 

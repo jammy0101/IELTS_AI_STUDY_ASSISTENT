@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../../controller/firebase_services/firebase_services.dart';
 import '../../../controller/math_controller/math_controller.dart';
 
 class Math extends StatefulWidget {
@@ -201,58 +202,6 @@ class _MathState extends State<Math> {
 
 
 
-  // AppBar _buildAppBar() {
-  //   return AppBar(
-  //     elevation: 0,
-  //     backgroundColor: Colors.white,
-  //     toolbarHeight: 72,
-  //     automaticallyImplyLeading: false,
-  //
-  //     title: Row(
-  //       children: [
-  //         _roundButton(Icons.arrow_back, onTap: () => Get.back()),
-  //         const SizedBox(width: 14),
-  //
-  //         Container(
-  //           padding: const EdgeInsets.all(10),
-  //           decoration: BoxDecoration(
-  //             color: const Color(0xFF8E44FF).withOpacity(0.15),
-  //             borderRadius: BorderRadius.circular(12),
-  //           ),
-  //           child: const Icon(
-  //             Icons.calculate_rounded,
-  //             color: Color(0xFF8E44FF),
-  //             size: 22,
-  //           ),
-  //         ),
-  //
-  //         const SizedBox(width: 12),
-  //         const Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text(
-  //               "Math Solver",
-  //               style: TextStyle(
-  //                 fontSize: 17,
-  //                 fontWeight: FontWeight.w700,
-  //                 color: Colors.black,
-  //               ),
-  //             ),
-  //             Text(
-  //               "AI-Powered Calculator",
-  //               style: TextStyle(fontSize: 12, color: Colors.black54),
-  //             ),
-  //           ],
-  //         ),
-  //
-  //         const Spacer(),
-  //         _roundButton(Icons.more_vert),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // ---------------------- RESULT CARD ----------------------
   Widget _mathResultCard(String text) {
     return Container(
       width: double.infinity,
@@ -615,56 +564,6 @@ class _MathState extends State<Math> {
     );
   }
 
-  // Widget _keypad() {
-  //   final buttons = [
-  //     ["7", "8", "9", "÷"],
-  //     ["4", "5", "6", "×"],
-  //     ["1", "2", "3", "-"],
-  //     ["0", ".", "%", "+"],
-  //   ];
-  //
-  //   return Column(
-  //     children: buttons.map((row) {
-  //       return Padding(
-  //         padding: const EdgeInsets.only(bottom: 10),
-  //
-  //         child: Row(
-  //           children: row.map((btn) {
-  //             return Expanded(
-  //               child: GestureDetector(
-  //                 onTap: () => _insertText(btn),
-  //
-  //                 child: Container(
-  //                   height: 55,
-  //                   margin: const EdgeInsets.symmetric(horizontal: 6),
-  //
-  //                   decoration: BoxDecoration(
-  //                     color: "+-×÷".contains(btn)
-  //                         ? const Color(0xFFF2E9FF)
-  //                         : const Color(0xFFF7F9FC),
-  //                     borderRadius: BorderRadius.circular(12),
-  //                   ),
-  //
-  //                   child: Center(
-  //                     child: Text(
-  //                       btn,
-  //                       style: const TextStyle(
-  //                         fontSize: 18,
-  //                         fontWeight: FontWeight.w700,
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             );
-  //           }).toList(),
-  //         ),
-  //       );
-  //     }).toList(),
-  //   );
-  // }
-
-  // ---------------------- SOLVE BUTTON ----------------------
   Widget _solveButton() {
     return Container(
       height: 54,
@@ -677,14 +576,28 @@ class _MathState extends State<Math> {
       ),
 
       child: TextButton.icon(
-        onPressed: () {
+        onPressed: () async {
           if (_controller.text.trim().isEmpty) {
             Get.snackbar("Error", "Please enter a math problem",
                 backgroundColor: Colors.red, colorText: Colors.white);
             return;
           }
-          controller.solve(_controller.text.trim());
+
+          // 1. Start solving
+          await controller.solve(_controller.text.trim());
+
+          // 2. When solving finishes, update daily progress
+          if (controller.result.value.isNotEmpty) {
+            final fs = Get.find<FirebaseServices>();
+
+            await fs.updateDailyProgress(
+              summaries: 0,
+              questions: 0,
+              solved: 1,   // 👈 Math solved +1
+            );
+          }
         },
+
 
         icon: const Icon(Icons.calculate, color: Colors.white),
         label: const Text(

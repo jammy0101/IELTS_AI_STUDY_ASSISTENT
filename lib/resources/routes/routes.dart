@@ -73,7 +73,7 @@ class AppRoutes {
     ),
     GetPage(
       name: RoutesName.saved,
-      page: () => const Saved(),
+      page: () =>  Saved(),
       transition: Transition.leftToRightWithFade,
       transitionDuration: const Duration(milliseconds: 250),
     ),

@@ -6,6 +6,7 @@ import 'package:ielts_ai_study/resources/bottom_navigation_bar/botton_navigation
 import 'package:ielts_ai_study/resources/routes/routes_names.dart';
 
 import '../../../controller/firebase_services/firebase_services.dart';
+import '../../widgets/add_fire_pulse/fire_animation.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,6 +16,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  @override
+  void initState() {
+    super.initState();
+    final services = Get.find<FirebaseServices>();
+    services.loadUserProfile(); // ensure listener starts
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,13 +143,16 @@ class _HomeState extends State<Home> {
 
               const SizedBox(height: 14),
 
-              Row(
-                children: [
-                  _progressCard("12", "Summaries", Icons.menu_book_rounded),
-                  _progressCard("45", "Questions", Icons.help_outline_rounded),
-                  _progressCard("8", "Solved", Icons.check_circle_outline),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     _progressCard("12", "Summaries", Icons.menu_book_rounded),
+              //     _progressCard("45", "Questions", Icons.help_outline_rounded),
+              //     _progressCard("8", "Solved", Icons.check_circle_outline),
+              //   ],
+              // ),
+              _buildProgressSection(),
+
+
 
               const SizedBox(height: 26),
             ],
@@ -155,6 +168,9 @@ class _HomeState extends State<Home> {
   Widget _buildHeader() {
     final FirebaseServices services = Get.find<FirebaseServices>();
     final data = services.userData;
+
+    final int streak = data['streak'] ?? 1;
+
 
     final String? userName = data['name'];
     final String? userPhoto = data['profileImage'];
@@ -234,52 +250,7 @@ class _HomeState extends State<Home> {
             ],
           ),
           const SizedBox(height: 22),
-          // Avatar + Welcome
-          // Row(
-          //   children: [
-          //     CircleAvatar(
-          //       radius: 30,
-          //       backgroundColor: Colors.grey[300],
-          //       child: Icon(
-          //         Icons.person,
-          //         size: 32,
-          //         color: Colors.grey[700],
-          //       ),
-          //     ),
-          //     // CircleAvatar(
-          //     //   radius: 30,
-          //     //   backgroundColor: Colors.grey[300],
-          //     //
-          //     //   backgroundImage: userPhotoUrl != null && userPhotoUrl!.isNotEmpty
-          //     //       ? NetworkImage(userPhotoUrl!)
-          //     //       : null,
-          //     //
-          //     //   child: (userPhotoUrl == null || userPhotoUrl!.isEmpty)
-          //     //       ? Icon(Icons.person, size: 32, color: Colors.grey[700])
-          //     //       : null,
-          //     // ),
-          //
-          //     const SizedBox(width: 14),
-          //     Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: const [
-          //         Text(
-          //           "Welcome back,",
-          //           style: TextStyle(color: Colors.white70, fontSize: 14),
-          //         ),
-          //         Text(
-          //           "Sarah!",
-          //           style: TextStyle(
-          //             color: Colors.white,
-          //             fontSize: 22,
-          //             fontWeight: FontWeight.w800,
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ],
-          // ),
-          // Avatar + Welcome
+
           Row(
             children: [
               // PROFILE IMAGE
@@ -328,19 +299,20 @@ class _HomeState extends State<Home> {
               color: Colors.white.withOpacity(0.25),
               borderRadius: BorderRadius.circular(18),
             ),
+
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       "Study Streak",
                       style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     Text(
-                      "7 Days",
-                      style: TextStyle(
+                      "$streak Days",    // ⭐ Dynamic streak value
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -348,16 +320,11 @@ class _HomeState extends State<Home> {
                     ),
                   ],
                 ),
+                const FirePulseIcon(),
 
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.white54,
-                  child: Icon(Icons.local_fire_department,
-                      color: Colors.deepOrange, size: 22),
-                )
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -530,8 +497,50 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+  Widget _buildProgressSection() {
+    final FirebaseServices services = Get.find<FirebaseServices>();
+
+    return Obx(() {
+      print("🔄 OBX → progress section rebuilding...");
+      print("📦 Current userData: ${services.userData}");
+
+      final progress = services.userData['progress'] ?? {
+        "summaries": 0,
+        "questions": 0,
+        "solved": 0,
+      };
+
+      print("📊 Extracted progress:");
+      print("➡️ summaries: ${progress["summaries"]}");
+      print("➡️ questions: ${progress["questions"]}");
+      print("➡️ solved: ${progress["solved"]}");
+
+      // Force UI update log
+      services.userData.refresh();
+      print("✨ userData.refresh() called inside progress section");
+
+      return Row(
+        children: [
+          _progressCard(
+            progress["summaries"].toString(),
+            "Text Summaries",
+            Icons.menu_book_rounded,
+          ),
+          _progressCard(
+            progress["questions"].toString(),
+            "MCQs Generated",
+            Icons.quiz_outlined,
+          ),
+          _progressCard(
+            progress["solved"].toString(),
+            "Math Problems Solved",
+            Icons.calculate_outlined,
+          ),
+        ],
+      );
+    });
+  }
+
+
 }
-
-
-
-
